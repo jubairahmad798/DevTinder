@@ -2,70 +2,90 @@ const express = require('express');
 
 const app = express();
 
-app.get("/Admin/getUserData", (req, res) => {
 
-    // Before sending sensitive user data,
-    // we should verify whether the admin is authorized or not.
+/*
+Route-Level Middleware for Admin Section
 
-    const token = "xyz1";
+This middleware will run first for every request
+that starts with /Admin
 
-    // Compare provided token with valid admin token
-    const isAdminAuthorized = token === "xyz";
+Examples:
+- /Admin/getUserData
+- /Admin/deleteUser
 
-    if (isAdminAuthorized) {
+Purpose:
+To check whether the admin is authorized
+before allowing access to protected routes.
+*/
 
-        // If admin is verified, allow access to user data
-        res.send("User data sent !!");
+app.use("/Admin", (req, res, next) => {
+
+    // Token usually comes from headers, cookies, or login session
+    // Here we are using a dummy token for learning purpose
+    const token = "abcd";
+
+    // Compare incoming token with valid admin token
+    const isAdminAuthorized = token === "abcd";
+
+    if (!isAdminAuthorized) {
+
+        // If token is invalid, stop request here
+        // and send Unauthorized response
+        res.status(401).send("Admin is not Authorized !! ❌");
 
     } else {
 
-        // If token is invalid, deny access with Unauthorized status
-        res.status(401).send("Admin is not authorized !! 🤷‍♂️🤷‍♂️🤷‍♂️");
+        // If token is valid, pass control
+        // to the next middleware or route handler
+        next();
     }
 });
+
+
+
+app.get("/Admin/getUserData", (req, res) => {
+
+    // This route runs only when admin passes middleware check
+
+    // Send protected user data
+    res.send("User data sent !!");
+});
+
+
 
 app.get("/Admin/deleteUser", (req, res) => {
 
-    // Again checking admin authorization before deleting user
+    // This route also runs only after successful authorization
 
-    const token = "ckiodv";
-
-    // Validate token
-    const isAdminAuthorized = token === "jnfjsdf";
-
-    if (isAdminAuthorized) {
-
-        // If authorized, user can be deleted
-        res.send("User Deleted !!");
-
-    } else {
-
-        // If not authorized, block the request
-        res.status(401).send("Admin is not authorized !!");
-    }
+    // Perform delete action
+    res.send("User Deleted !!");
 });
 
 
+
 /*
-Problem:
-We are repeating the same authorization logic
-inside every /Admin route.
+Why Middleware is Better Here?
 
-Solution:
-Use Middleware.
+Without middleware:
+Authorization logic must be written
+again and again in every admin route.
 
-Middleware can check admin authorization once
-for all /Admin routes before request reaches
-the route handler.
+With middleware:
+Write auth logic once and protect
+all /Admin routes automatically.
 
 Benefits:
 1. Cleaner code
 2. Reusable logic
-3. Better maintainability
-4. Easier to manage security checks
+3. Easy to maintain
+4. Better project structure
+5. Centralized security checks
 */
 
 
+
 app.listen(7777, function () {
+
+    // Server started successfully
     console.log("app is listening on port no. 7777 !");
 });
