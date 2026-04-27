@@ -2,34 +2,75 @@ const express = require('express');
 
 const app = express();
 
-const {adminAuth, userAuth} = require("./middleware/auth");
 
-app.use("/Admin", adminAuth);
-app.use("/user",userAuth);
+app.get("/getUserData", (req, res) => {
 
-app.get("/Admin/getUserData", (req, res) => {
+    // This route is created to demonstrate
+    // how Express handles unexpected errors.
 
-    // This route runs only when admin passes middleware check
+    // Manually throwing an error
+    // to simulate server-side failure
+    throw new Error("Something failed inside route");
 
-    // Send protected user data
-    res.send("User data sent !!");
+    // This line will never run because
+    // execution stops after throw
+    res.send("User data set");
 });
 
 
 
-app.get("/Admin/deleteUser", (req, res) => {
+/*
+Global Error Handling Middleware
 
-    // This route also runs only after successful authorization
+Special Syntax:
+Express recognizes error middleware
+when it has 4 parameters:
 
-    // Perform delete action
-    res.send("User Deleted !!");
+(err, req, res, next)
+
+Purpose:
+To catch errors thrown inside routes
+or middleware and send proper response.
+
+This helps us avoid writing try-catch
+in every route manually.
+*/
+
+app.use((err, req, res, next) => {
+
+    // If any error comes from above routes,
+    // control reaches this middleware
+
+    console.error(err.message);
+
+    if (err) {
+
+        // Send generic server error response
+        res.status(500).send("Something went wrong !!");
+    }
 });
 
 
 
-app.get("/user",(req,res)=>{
-    res.send ("Hello from user !!")
-})
+/*
+Why Error Middleware is Useful?
+
+Without it:
+We may need try-catch in many routes.
+
+With it:
+1. Centralized error handling
+2. Cleaner route code
+3. Better debugging
+4. Consistent error responses
+5. Easier maintenance
+
+Important:
+Error middleware should usually be placed
+after all routes.
+*/
+
+
 
 app.listen(7777, function () {
 
