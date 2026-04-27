@@ -2,21 +2,23 @@ const express = require('express');
 
 const app = express();
 
-// Ways for writing multiple route handlers in one route
+// We can also write route handlers inside array
 
-app.use("/user", (req, res , next)=>{
-    console.log("1st route handler !!");
-    next();
-} ,
-(req,res,next)=>{
-    console.log("2nd route handler !!");
-    next();
-},
-(req, res,next)=>{
-    console.log("3rd route handler !!");
-    res.send ("Response is sending from route 3rd !! 👋");
-}
-
+// app.use("/user", [rH1, rH2], rH3, rH4..)  // Any way we can write array
+app.use("/user", 
+    [
+        (req,res,next)=>{
+            //code 
+            next();
+        },
+        (req,res,next)=>{
+            //code
+            next();
+        }],
+        (req, res,next)=>{
+            res.send("Response is sended !!🤷‍♂️")
+        }
+    
 )
 
 
