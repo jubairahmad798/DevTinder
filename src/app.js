@@ -1,79 +1,62 @@
-const express = require('express');
+const express = require("express");
+const app = express(); // Create an Express application instance
+const { connectDB } = require("./config/database"); // Import database connection function
+const User = require ("./models/user.js");
 
-const app = express();
 
 
-app.get("/getUserData", (req, res) => {
+app.post ("/signup", async (req, res)=>{
 
-    // This route is created to demonstrate
-    // how Express handles unexpected errors.
+    const user = new User({
+        firstName :"Jubair2",
+        lastName : "Ahmad",
+        emailId : "jubair2@gmail.com",
+        password :"jubair1232"
+    })
+try{
+     await user.save();
+     res.send("user Added Successfully to the Database !!✅");
+    }catch(err){
+    res.status(400).send("oops !! Error in saving user ❌");
+}
 
-    // Manually throwing an error
-    // to simulate server-side failure
-    throw new Error("Something failed inside route");
-
-    // This line will never run because
-    // execution stops after throw
-    res.send("User data set");
 });
 
 
 
-/*
-Global Error Handling Middleware
-
-Special Syntax:
-Express recognizes error middleware
-when it has 4 parameters:
-
-(err, req, res, next)
-
-Purpose:
-To catch errors thrown inside routes
-or middleware and send proper response.
-
-This helps us avoid writing try-catch
-in every route manually.
-*/
-
-app.use((err, req, res, next) => {
-
-    // If any error comes from above routes,
-    // control reaches this middleware
-
-    console.error(err.message);
-
-    if (err) {
-
-        // Send generic server error response
-        res.status(500).send("Something went wrong !!");
-    }
-});
 
 
 
-/*
-Why Error Middleware is Useful?
-
-Without it:
-We may need try-catch in many routes.
-
-With it:
-1. Centralized error handling
-2. Cleaner route code
-3. Better debugging
-4. Consistent error responses
-5. Easier maintenance
-
-Important:
-Error middleware should usually be placed
-after all routes.
-*/
 
 
 
-app.listen(7777, function () {
 
-    // Server started successfully
-    console.log("app is listening on port no. 7777 !");
-});
+
+
+
+
+
+
+
+
+
+
+// First connect to database, then start server
+connectDB()
+  .then(() => {
+    
+    // Database connected successfully
+    console.log("Database connection established successfully !! 👌👌");
+
+    // Start Express server on port 7777
+    app.listen(7777, () => {
+      console.log("Server is running on port 7777 !! ✅");
+    });
+
+  })
+  .catch((err) => {
+    
+    // If database connection fails, show error message
+    console.error("Database cannot be connected !! ❌", err);
+
+  });

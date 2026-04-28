@@ -10,12 +10,13 @@
   "author": "Jubair",
   "type": "commonjs",
   "main": "index.js",
-  "scripts": { 
-    "start" :"node src/app.js",
-    "dev" : "nodemon src/app.js"
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
   },
   "dependencies": {
     "express": "^5.2.1",
+    "mongoose": "^9.5.0",
     "nodemon": "^3.1.14"
   }
 }
