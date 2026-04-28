@@ -2,6 +2,8 @@ const express = require("express");
 const app = express(); // Create an Express application instance
 const { connectDB } = require("./config/database"); // Import database connection function
 const User = require ("./models/user.js");
+require("dotenv").config();
+
 
 
 
@@ -21,21 +23,6 @@ try{
 }
 
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
