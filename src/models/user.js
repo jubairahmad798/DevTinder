@@ -1,4 +1,5 @@
 const mongoose = require ("mongoose");
+const validator = require("validator");
 
 // Create User schema to define structure of user documents in MongoDB
 const userSchema = mongoose.Schema({
@@ -24,7 +25,12 @@ const userSchema = mongoose.Schema({
         required: true,
         trim : true,
         unique : true,
-        lowercase :true
+        lowercase :true,
+        validate(value){
+            if(!validator.isEmail(value)){
+                throw new Error("Invalid email address!"+value);
+            }
+        }
       
       
     },
@@ -32,7 +38,11 @@ const userSchema = mongoose.Schema({
         type : String,
         required: true,
         unique : true,
-        minLength:8,
+        validate(value){
+            if(!validator.isStrongPassword(value)){
+                throw new Error("weak password!" + value)
+            }
+        }
 
     },
     about:{
@@ -47,7 +57,12 @@ const userSchema = mongoose.Schema({
 
     photoUrl :{
         type : String,
-        default: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT48Ke_Q2uphy_MQect9sVe9j0zRyea2Kp26g&s"
+        default: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT48Ke_Q2uphy_MQect9sVe9j0zRyea2Kp26g&s",
+        validate(value){
+            if(!validator.isURL(value)){
+                throw new Error("invalid URL !!"+ value)
+            }
+        }
 
     
         

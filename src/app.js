@@ -247,9 +247,9 @@ app.patch("/user/:userId", async (req, res) => {
     // ------------------------------------------------
 
     // Password minimum length = 8
-    if (data.password && data.password.length < 8) {
-      throw new Error("Password too short");
-    }
+    // if (data.password && data.password.length < 8) {
+    //   throw new Error("Password too short");
+    // }
 
     // ------------------------------------------------
     // ABOUT VALIDATION
