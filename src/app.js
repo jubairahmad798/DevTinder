@@ -14,6 +14,21 @@ require("dotenv").config();
 app.use(express.json());
 // Middleware: converts incoming JSON request body into JavaScript object
 // Parsed data becomes available inside req.body
+const {validateSignUpData} = require("./utils/validation.js")
+const bcrypt = require("bcrypt");
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ==================================================
 // GET USER BY EMAIL ID
@@ -296,11 +311,28 @@ app.patch("/user/:userId", async (req, res) => {
 // ==================================================
 
 app.post("/signup", async (req, res) => {
-  const user = new User(req.body);
+
+  try {
+  validateSignUpData(req);
+  const {firstName, lastName, emailId, password} = req.body;
+  
+  //hashing password
+  const hashedPassword = await bcrypt.hash(password,10);
+
+//creating instance of the User model :- Good way only explicitly data will be save in DB
+  const user = new User({
+    firstName,
+    lastName,
+    emailId,
+    password: hashedPassword,
+
+  });
+  // const user = new User(req.body);  // bad way user can send malicious data
   // Create new User document instance using client data
   // req.body contains dynamic values from Postman/frontend
 
-  try {
+
+
     await user.save();
     // Save new user document into MongoDB
 
@@ -310,6 +342,50 @@ app.post("/signup", async (req, res) => {
     // Validation or database error
   }
 });
+
+
+
+
+// Login API 
+
+app.post("/login", async (req, res)=>{
+  
+  try{
+    const{emailId, password} = req.body;
+
+    const user = await User.findOne({emailId: emailId})
+    if(!user){
+      throw new Error("Invalid email Address");
+      
+    }
+    const isPassword = await bcrypt.compare(password, user.password);
+    if(isPassword){
+      res.send("Login Successful !")
+    }else{
+      throw new Error("Incorrect Password!");
+      
+    }
+  } catch (err) {
+    res.status(400).send("Oops !! Error in saving user ❌ " + err.message);
+    // Validation or database error
+  }
+
+  
+  
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ==================================================
 // CONNECT DATABASE THEN START SERVER

@@ -83,8 +83,9 @@ const userSchema = mongoose.Schema({
     }
 }
 
-},
-{timestamps : true});
+}
+// {timestamps : true}
+);
 
 // Export User model to interact with users collection in MongoDB
 
