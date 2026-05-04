@@ -17,6 +17,13 @@ app.use(express.json());
 const {validateSignUpData} = require("./utils/validation.js")
 const bcrypt = require("bcrypt");
 
+const cookieParse = require("cookie-parser");
+
+app.use(cookieParse());
+
+const jwt = require("jsonwebtoken");
+
+
 
 
 
@@ -360,6 +367,18 @@ app.post("/login", async (req, res)=>{
     }
     const isPassword = await bcrypt.compare(password, user.password);
     if(isPassword){
+
+      //create jwt token
+
+        const token = jwt.sign({_id: user._id}, process.env.JWT_PRIVATE_KEY);
+        // console.log(token)
+
+
+      // set token to the cookie
+
+      // res.cookie("token", "hsgvaiovnvidgdbdfdfjjodvjsbfdausdn");//demo for random token
+      res.cookie("token", token); //set the cookie to the browser/user
+
       res.send("Login Successful !")
     }else{
       throw new Error("Incorrect Password!");
@@ -376,7 +395,34 @@ app.post("/login", async (req, res)=>{
 })
 
 
+//Lets make the GET / PROFILE API 
+app.use("/profile", async(req, res)=>{
 
+
+ try{
+   const cookies = req.cookies;
+  // console.log(cookies);
+
+  const {token} = cookies;
+  if(!token){
+    throw new Error("Invalid token !");
+ }
+ const decodedMessage = await jwt.verify(token,process.env.JWT_PRIVATE_KEY)
+
+//  console.log(decodedMessage)
+const {_id} =decodedMessage;
+
+const user = await User.findById(_id);
+
+  
+  res.send(user);
+
+ }
+ catch(err){
+  res.status(404).send("Error: "+err.message)
+ }
+  
+})
 
 
 
