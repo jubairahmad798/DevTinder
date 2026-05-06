@@ -1,5 +1,10 @@
 const mongoose = require ("mongoose");
 const validator = require("validator");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+const bcrypt = require("bcrypt");
+
+
 
 // Create User schema to define structure of user documents in MongoDB
 const userSchema = mongoose.Schema({
@@ -85,8 +90,28 @@ const userSchema = mongoose.Schema({
 
 }
 // {timestamps : true}
+
+
+
 );
 
+
+userSchema.methods.getJWT = async function () {
+
+    const user = this;
+
+        const token =await jwt.sign({_id:user._id}, process.env.JWT_PRIVATE_KEY, {expiresIn:'1d'});
+        return token;
+    
+};
+
+userSchema.methods.validPassword= async function(passwordInputByUser){
+    const user =this;
+   const  passwordHash =user.password;
+
+    const isPasswordValid = await bcrypt.compare(passwordInputByUser, passwordHash);
+    return isPasswordValid;
+}
 // Export User model to interact with users collection in MongoDB
 
 module.exports = mongoose.model('User', userSchema);

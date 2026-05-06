@@ -22,7 +22,7 @@ const cookieParse = require("cookie-parser");
 app.use(cookieParse());
 
 const jwt = require("jsonwebtoken");
-
+const {userAuth} = require("./middleware/auth.js");
 
 
 
@@ -365,19 +365,21 @@ app.post("/login", async (req, res)=>{
       throw new Error("Invalid email Address");
       
     }
-    const isPassword = await bcrypt.compare(password, user.password);
+    const isPassword = await user.validPassword(password);
     if(isPassword){
 
       //create jwt token
+      const token = await user.getJWT();
 
-        const token = jwt.sign({_id: user._id}, process.env.JWT_PRIVATE_KEY);
+        // const token = await jwt.sign({_id: user._id}, process.env.JWT_PRIVATE_KEY, {expiresIn:'1d'});
         // console.log(token)
 
 
       // set token to the cookie
 
       // res.cookie("token", "hsgvaiovnvidgdbdfdfjjodvjsbfdausdn");//demo for random token
-      res.cookie("token", token); //set the cookie to the browser/user
+      res.cookie("token", token,  { maxAge: 24 * 60 * 60 * 1000}); //set the cookie to the browser/user 
+      //maxAge: if i do not set expiry than it automaticaly delete when browser closes
 
       res.send("Login Successful !")
     }else{
@@ -385,8 +387,8 @@ app.post("/login", async (req, res)=>{
       
     }
   } catch (err) {
-    res.status(400).send("Oops !! Error in saving user ❌ " + err.message);
-    // Validation or database error
+    res.status(400).send("Error " + err.message);
+    
   }
 
   
@@ -394,29 +396,32 @@ app.post("/login", async (req, res)=>{
 
 })
 
+//Post api for sendConnectionResquest
 
-//Lets make the GET / PROFILE API 
-app.use("/profile", async(req, res)=>{
+app.post("/sendConnectionRequest",userAuth, async(req, res)=>{
 
 
- try{
-   const cookies = req.cookies;
-  // console.log(cookies);
+try {
+    const user = req.user;
+    // console.log("sending the connection request !");
+    res.send(user.firstName+" has sent you a connection request.")
 
-  const {token} = cookies;
-  if(!token){
-    throw new Error("Invalid token !");
- }
- const decodedMessage = await jwt.verify(token,process.env.JWT_PRIVATE_KEY)
-
-//  console.log(decodedMessage)
-const {_id} =decodedMessage;
-
-const user = await User.findById(_id);
+} catch (err) {
+      res.status(400).send("Error " + err.message);
 
   
-  res.send(user);
+}  
+})
 
+
+//Lets make the GET / PROFILE API 
+app.use("/profile",userAuth, async(req, res)=>{
+
+  
+try{
+   const user = req.user;
+   res.send(user);
+   
  }
  catch(err){
   res.status(404).send("Error: "+err.message)
